@@ -142,7 +142,7 @@ const App = () => {
         <canvas ref={canvasRef} className="object-detection" />
       </div>
 
-      {/* Conditional rendering of the button */}
+      {/* Conditional rendering of the audio player and button */}
       {detectedObject && !audioPlaying && (
         <div className="audio-button-container">
           <button
@@ -152,6 +152,24 @@ const App = () => {
           >
             Mainkan Audio
           </button>
+        </div>
+      )}
+
+      {/* Audio player */}
+      {detectedObject && (
+        <div className="audio-player-container">
+          <audio
+            id="audio-player"
+            controls
+            onEnded={() => {
+              setAudioPlaying(false);
+              setDetectedObject(null);
+            }}
+            autoPlay={false} // Prevent autoplay, user must interact
+          >
+            <source src={audioMap[detectedObject]?.src} type="audio/mpeg" />
+            Your browser does not support the audio element.
+          </audio>
         </div>
       )}
     </div>
