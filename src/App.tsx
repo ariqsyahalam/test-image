@@ -35,9 +35,12 @@ const App = () => {
   const playAudio = (label: string) => {
     const audio = audioMap[label.toLowerCase()];
     if (audio) {
-      audio.play().catch((error) => {
-        console.error(`Error playing audio for ${label}:`, error);
+      audio.play().then(() => {
+        console.log(`Audio untuk ${label} berhasil diputar`);
+      }).catch((error) => {
+        console.error(`Gagal memutar audio untuk ${label}:`, error);
       });
+
       setAudioPlaying(true);  // Mark as playing audio
       console.log(`Playing audio for: ${label}`);
 
@@ -119,6 +122,7 @@ const App = () => {
 
   // Function to handle button click and play audio
   const handlePlayAudio = () => {
+    console.log("detectedObject:", detectedObject);
     if (detectedObject) {
       playAudio(detectedObject);
     }
@@ -141,7 +145,13 @@ const App = () => {
       {/* Conditional rendering of the button */}
       {detectedObject && !audioPlaying && (
         <div className="audio-button-container">
-          <button onClick={handlePlayAudio}>Mainkan Audio</button>
+          <button
+            id="audio-button"
+            onClick={handlePlayAudio}
+            onTouchStart={handlePlayAudio} // Added touchstart for mobile support
+          >
+            Mainkan Audio
+          </button>
         </div>
       )}
     </div>
