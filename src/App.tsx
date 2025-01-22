@@ -13,7 +13,7 @@ import {
 
 import { drawRect } from './utils/drawRect';
 
-let detectInterval: NodeJS.Timer;
+let detectInterval: ReturnType<typeof setInterval>;
 
 const App = () => {
   const webcamRef = useRef<Webcam>(null);
@@ -46,7 +46,7 @@ const App = () => {
     // Loop to detect objects every 1 second
     detectInterval = setInterval(() => {
       runObjectDetection(net);
-    }, 1000); // Deteksi objek setiap 1 detik
+    }, 1000);
   }
 
   function showMyVideo() {
@@ -112,7 +112,7 @@ const App = () => {
     showMyVideo();
     runCoco();
 
-    return () => clearInterval(detectInterval); // Cleanup when component unmounts
+    return () => clearInterval(detectInterval);
   }, []);
 
   return (
