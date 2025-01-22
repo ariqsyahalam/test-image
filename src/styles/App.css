@@ -41,3 +41,36 @@
   font-size: 16px;
   cursor: pointer;
 }
+
+.wrapper {
+  position: relative;
+}
+
+.container {
+  position: relative;
+}
+
+.my-video {
+  width: 100%;
+  height: auto;
+}
+
+.object-detection {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1; /* Menjaga canvas tetap di atas video */
+}
+
+.audio-player-container {
+  position: absolute;
+  top: 20px; /* Atur posisi sesuai kebutuhan */
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  width: 80%; /* Ukuran audio player */
+}
+
+audio {
+  width: 100%; /* Sesuaikan dengan lebar container */
+}

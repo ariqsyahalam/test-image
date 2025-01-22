@@ -27,7 +27,7 @@ const App = () => {
     // Add more objects and their respective audio files as needed
   };
 
-  // State to manage which object was detected and if the button is visible
+  // State to manage which object was detected and if the audio is playing
   const [detectedObject, setDetectedObject] = useState<string | null>(null);
   const [audioPlaying, setAudioPlaying] = useState(false);
 
@@ -103,7 +103,7 @@ const App = () => {
         // Update drawing utility
         drawRect(detectedObjects, context);
 
-        // Check detected objects and set state to show button
+        // Check detected objects and set state to show audio player
         detectedObjects.forEach((object) => {
           const label = object.class.toLowerCase();
           const confidence = (object.score * 100).toFixed(2); // Confidence in percentage
@@ -111,22 +111,14 @@ const App = () => {
           // Log to console
           console.log(`Detected: ${label}, Confidence: ${confidence}%`);
 
-          // Show the button to play audio if it's a specific object
+          // Show the audio player if it's a specific object and not already playing
           if (audioMap[label] && !audioPlaying && !detectedObject) {
-            setDetectedObject(label); // Update state to show the button for this object
+            setDetectedObject(label); // Update state to show the audio player for this object
           }
         });
       }
     }
   }
-
-  // Function to handle button click and play audio
-  const handlePlayAudio = () => {
-    console.log("detectedObject:", detectedObject);
-    if (detectedObject) {
-      playAudio(detectedObject);
-    }
-  };
 
   useEffect(() => {
     showMyVideo();
@@ -142,30 +134,17 @@ const App = () => {
         <canvas ref={canvasRef} className="object-detection" />
       </div>
 
-      {/* Conditional rendering of the audio player and button */}
-      {detectedObject && !audioPlaying && (
-        <div className="audio-button-container">
-          <button
-            id="audio-button"
-            onClick={handlePlayAudio}
-            onTouchStart={handlePlayAudio} // Added touchstart for mobile support
-          >
-            Mainkan Audio
-          </button>
-        </div>
-      )}
-
-      {/* Audio player */}
+      {/* Conditional rendering of the audio player */}
       {detectedObject && (
         <div className="audio-player-container">
           <audio
             id="audio-player"
             controls
+            autoPlay
             onEnded={() => {
               setAudioPlaying(false);
-              setDetectedObject(null);
+              setDetectedObject(null); // Hide object label after audio finishes
             }}
-            autoPlay={false} // Prevent autoplay, user must interact
           >
             <source src={audioMap[detectedObject]?.src} type="audio/mpeg" />
             Your browser does not support the audio element.
