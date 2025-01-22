@@ -1,9 +1,8 @@
 import './styles/App.css';
-
 import '@tensorflow/tfjs-backend-cpu';
 import '@tensorflow/tfjs-backend-webgl';
 
-import { useRef, useEffect } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import Webcam from 'react-webcam';
 
 import {
@@ -19,7 +18,7 @@ const App = () => {
   const webcamRef = useRef<Webcam>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  // Load the audio files
+  // Audio map for detected objects
   const audioMap: { [key: string]: HTMLAudioElement } = {
     person: new Audio('/audio/person.mp3'),
     "cell phone": new Audio('/audio/cellphone.mp3'),
@@ -28,19 +27,30 @@ const App = () => {
     // Add more objects and their respective audio files as needed
   };
 
+  // State to manage which object was detected and if the button is visible
+  const [detectedObject, setDetectedObject] = useState<string | null>(null);
+  const [audioPlaying, setAudioPlaying] = useState(false);
+
   // Function to play audio based on detected object
-  function playAudio(label: string) {
+  const playAudio = (label: string) => {
     const audio = audioMap[label.toLowerCase()];
     if (audio) {
-      audio.play();
-
-      // Log to console for which object and audio is playing
+      audio.play().catch((error) => {
+        console.error(`Error playing audio for ${label}:`, error);
+      });
+      setAudioPlaying(true);  // Mark as playing audio
       console.log(`Playing audio for: ${label}`);
+
+      // Listen for when the audio finishes playing
+      audio.onended = () => {
+        setAudioPlaying(false); // Audio has finished, set state to allow button to appear again
+        setDetectedObject(null); // Hide the object label after audio finishes
+      };
     }
-  }
+  };
 
   async function runCoco() {
-    // Load network
+    // Load the coco-ssd model
     const net = await cocoSSDLoad();
 
     // Loop to detect objects every 1 second
@@ -90,7 +100,7 @@ const App = () => {
         // Update drawing utility
         drawRect(detectedObjects, context);
 
-        // Log and play audio for detected objects
+        // Check detected objects and set state to show button
         detectedObjects.forEach((object) => {
           const label = object.class.toLowerCase();
           const confidence = (object.score * 100).toFixed(2); // Confidence in percentage
@@ -98,15 +108,21 @@ const App = () => {
           // Log to console
           console.log(`Detected: ${label}, Confidence: ${confidence}%`);
 
-          // Play audio for the detected object
-          if (audioMap[label]) {
-            console.log(`Audio for ${label} is now playing.`);
-            playAudio(label);
+          // Show the button to play audio if it's a specific object
+          if (audioMap[label] && !audioPlaying && !detectedObject) {
+            setDetectedObject(label); // Update state to show the button for this object
           }
         });
       }
     }
   }
+
+  // Function to handle button click and play audio
+  const handlePlayAudio = () => {
+    if (detectedObject) {
+      playAudio(detectedObject);
+    }
+  };
 
   useEffect(() => {
     showMyVideo();
@@ -121,6 +137,13 @@ const App = () => {
         <Webcam ref={webcamRef} className="my-video" muted />
         <canvas ref={canvasRef} className="object-detection" />
       </div>
+
+      {/* Conditional rendering of the button */}
+      {detectedObject && !audioPlaying && (
+        <div className="audio-button-container">
+          <button onClick={handlePlayAudio}>Mainkan Audio</button>
+        </div>
+      )}
     </div>
   );
 };
